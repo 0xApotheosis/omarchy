@@ -21,9 +21,15 @@ detect_apple_display_device() {
   local devices=()
   local path=""
 
-  for path in /dev/usb/hiddev* /dev/hiddev*; do
-    [[ -e $path ]] && devices+=("$path")
-  done
+  if [[ -n ${OMARCHY_APPLE_HIDDEV_PATH:-} ]]; then
+    for path in "$OMARCHY_APPLE_HIDDEV_PATH"/hiddev* "$OMARCHY_APPLE_HIDDEV_PATH"/usb/hiddev*; do
+      [[ -e $path ]] && devices+=("$path")
+    done
+  else
+    for path in /dev/usb/hiddev* /dev/hiddev*; do
+      [[ -e $path ]] && devices+=("$path")
+    done
+  fi
 
   (( ${#devices[@]} > 0 )) || return 1
 
