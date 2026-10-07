@@ -102,9 +102,14 @@ fi
 # asdcontrol exits 0 against a hiddev node that is no longer the display
 # (interfaces renumber when the display replugs), so a brightness read is the
 # only reliable check that the cached device still works.
+tried_device="$device"
 if ! sudo asdcontrol "$device" -- "$step" >/dev/null || ! brightness="$(current_brightness "$device")"; then
   retry_with_fresh_device
-  sudo asdcontrol "$device" -- "$step" >/dev/null
+  # Replay a relative step only on a newly detected node so a failed
+  # read-back cannot apply the same adjustment twice.
+  if [[ $device != $tried_device ]]; then
+    sudo asdcontrol "$device" -- "$step" >/dev/null
+  fi
   brightness="$(current_brightness "$device")"
 fi
 
